@@ -7,7 +7,7 @@ function injectShopifyIcon() {
   }
 
   const icon = document.createElement('img');
-  icon.src = chrome.runtime.getURL('assets/shopify-icon-32.png');
+  icon.src = chrome.runtime.getURL('assets/shopify-icon-512.png');
   icon.className = 'shopify-detector-icon';
   icon.title = 'This is a Shopify store';
   
@@ -21,7 +21,7 @@ chrome.runtime.sendMessage({ type: 'CONTENT_SCRIPT_READY' });
 
 chrome.runtime.onMessage.addListener((message) => {
   console.log('[Content] Received message:', message);
-  if (message.type === 'SHOPIFY_STATUS' && message.data.isShopify) {
+  if (message.type === 'SHOPIFY_STATUS' && message.data.is_shopify) {
     console.log('[Content] Detected Shopify store, injecting icon');
     injectShopifyIcon();
   }

@@ -21,6 +21,12 @@
       "css": ["styles/content.css"]
     }
   ],
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/shopify-icon-512.png"],
+      "matches": ["<all_urls>"]
+    }
+  ],
   "icons": {
     "16": "assets/shopify-icon-16.png",
     "32": "assets/shopify-icon-32.png",

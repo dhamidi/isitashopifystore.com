@@ -7,8 +7,6 @@
   z-index: 2147483647;
   cursor: pointer;
   transition: transform 0.2s ease;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .shopify-detector-icon:hover {

@@ -13,6 +13,11 @@ func main() {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 
+	// Create events table if it doesn't exist
+	if err := createEventsTable(db); err != nil {
+		log.Fatalf("Failed to create events table: %v", err)
+	}
+
 	// Set up HTTP routes with pattern matching
 	mux := http.NewServeMux()
 	mux.HandleFunc("/status/", statusHandler)

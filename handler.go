@@ -93,15 +93,27 @@ func landingPageHandler(w http.ResponseWriter, r *http.Request) {
 
 func resultPageHandler(w http.ResponseWriter, r *http.Request) {
 	// Extract domain from path
-	domain := strings.TrimPrefix(r.URL.Path, "/")
-	if domain == "" {
+	path := strings.TrimPrefix(r.URL.Path, "/")
+	if path == "" {
 		http.Error(w, "Domain is required", http.StatusBadRequest)
+		return
+	}
+
+	// Extract domain from path (which might be a URL)
+	parsedURL, err := url.Parse(path)
+	if err != nil {
+		// If parsing fails, try to use the path as a domain
+		parsedURL = &url.URL{Host: path}
+	}
+	domain := parsedURL.Hostname()
+	if domain == "" {
+		http.Error(w, "Invalid domain", http.StatusBadRequest)
 		return
 	}
 
 	// Check if analysis exists
 	var result AnalysisResult
-	err := db.QueryRow(`
+	err = db.QueryRow(`
 		SELECT event_type, payload 
 		FROM events 
 		WHERE domain = ? 
@@ -204,9 +216,21 @@ func resultPageHandler(w http.ResponseWriter, r *http.Request) {
 
 func statusHandler(w http.ResponseWriter, r *http.Request) {
 	// Extract domain from path
-	domain := strings.TrimPrefix(r.URL.Path, "/status/")
-	if domain == "" {
+	path := strings.TrimPrefix(r.URL.Path, "/status/")
+	if path == "" {
 		http.Error(w, "Domain is required", http.StatusBadRequest)
+		return
+	}
+
+	// Extract domain from path (which might be a URL)
+	parsedURL, err := url.Parse(path)
+	if err != nil {
+		// If parsing fails, try to use the path as a domain
+		parsedURL = &url.URL{Host: path}
+	}
+	domain := parsedURL.Hostname()
+	if domain == "" {
+		http.Error(w, "Invalid domain", http.StatusBadRequest)
 		return
 	}
 
@@ -215,7 +239,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check if analysis exists
 	var result AnalysisResult
-	err := db.QueryRow(`
+	err = db.QueryRow(`
 		SELECT event_type, payload 
 		FROM events 
 		WHERE domain = ? 
@@ -258,4 +282,4 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Return the result
 	json.NewEncoder(w).Encode(result)
-} 
+}

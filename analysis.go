@@ -8,27 +8,31 @@ import (
 	"strings"
 )
 
-func analyzeDomain(domain string) {
+func analyzeDomain(input string) {
+	// Extract domain from input (which might be a URL or just a domain)
+	parsedURL, err := url.Parse(input)
+	if err != nil {
+		// If parsing fails, try to use the input as a domain
+		parsedURL = &url.URL{Host: input}
+	}
+	
+	// Get the domain name
+	domain := parsedURL.Hostname()
+	if domain == "" {
+		logEvent(db, input, "analysis_failed", map[string]string{
+			"error": "Invalid domain: " + input,
+		})
+		return
+	}
+
 	// Log analysis started
 	if err := logEvent(db, domain, "analysis_started", nil); err != nil {
 		log.Printf("Error logging analysis start: %v", err)
 		return
 	}
 
-	// Ensure domain has https scheme
-	if !strings.HasPrefix(domain, "https://") {
-		domain = "https://" + domain
-	}
-
-	// Parse URL to ensure we only analyze the root path
-	parsedURL, err := url.Parse(domain)
-	if err != nil {
-		logEvent(db, domain, "analysis_failed", map[string]string{
-			"error": "Invalid domain: " + err.Error(),
-		})
-		return
-	}
-	parsedURL.Path = "/"
+	// Create URL for analysis
+	analysisURL := "https://" + domain
 
 	// Create HTTP client that follows redirects (up to 3 times)
 	client := &http.Client{
@@ -41,7 +45,7 @@ func analyzeDomain(domain string) {
 	}
 
 	// Make the request
-	resp, err := client.Get(parsedURL.String())
+	resp, err := client.Get(analysisURL)
 	if err != nil {
 		logEvent(db, domain, "analysis_failed", map[string]string{
 			"error": "Failed to make HTTP request: " + err.Error(),

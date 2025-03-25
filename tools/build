@@ -1,0 +1,10 @@
+#!/bin/sh
+
+set -e
+
+BINARY_NAME="isitashopifystore"
+
+echo "Building application..."
+go build -o $BINARY_NAME
+
+echo "Build complete!" 

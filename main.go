@@ -7,7 +7,9 @@ import (
 
 func main() {
 	// Initialize database
-	if err := initDB(); err != nil {
+	var err error
+	db, err = initDB()
+	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 

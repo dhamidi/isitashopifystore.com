@@ -4,14 +4,15 @@
   "version": "1.0.0",
   "description": "Detects if a website is running on Shopify",
   "permissions": [
-    "activeTab",
+    "tabs",
     "storage"
   ],
   "host_permissions": [
     "https://isitashopifystore.com/*"
   ],
   "background": {
-    "service_worker": "scripts/background/background.js"
+    "service_worker": "scripts/background/background.js",
+    "type": "module"
   },
   "content_scripts": [
     {

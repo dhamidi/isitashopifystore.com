@@ -13,7 +13,7 @@ export async function getCachedResult(domain) {
   return result;
 }
 
-export function setDomainResult(domain, result) {
+export function setCachedResult(domain, result) {
   if (result.status === 'in_progress') {
     return;
   }

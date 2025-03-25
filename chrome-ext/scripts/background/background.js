@@ -10,10 +10,14 @@ async function handleDomainChange(tabId, domain) {
     await setCachedResult(domain, result);
   }
 
-  await chrome.tabs.sendMessage(tabId, {
-    type: 'SHOPIFY_STATUS',
-    data: result
-  });
+  try {
+    await chrome.tabs.sendMessage(tabId, {
+      type: 'SHOPIFY_STATUS',
+      data: result
+    });
+  } catch (error) {
+    console.debug('Could not send message to tab, content script may not be ready:', error);
+  }
 }
 
 setupTabListeners(handleDomainChange); 

@@ -6,16 +6,10 @@ set -e
 
 # Sync files to DigitalOcean droplet
 echo "Syncing files to DigitalOcean droplet..."
-rsync -avz --delete \
+rsync -avzR \
   isitashopifystore \
-  deploy@isitashopifystore.com:/opt/isitashopifystore/
-rsync -avz --delete \
   assets/ \
-  deploy@isitashopifystore.com:/opt/isitashopifystore/assets/
-rsync -avz --delete \
   html/ \
-  deploy@isitashopifystore.com:/opt/isitashopifystore/html/
-rsync -avz --delete \
-  Caddyfile \
   deploy@isitashopifystore.com:/opt/isitashopifystore/
+
 echo "Files synced successfully to DigitalOcean droplet" 

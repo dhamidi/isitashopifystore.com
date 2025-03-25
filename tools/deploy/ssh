@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Get the droplet ID using doctl
+DROPLET_ID=$(doctl compute droplet list --format ID,Name --no-header | grep isitashopifystore.com | awk '{print $1}')
+
+if [ -z "$DROPLET_ID" ]; then
+    echo "Error: Could not find droplet named isitashopifystore.com"
+    exit 1
+fi
+
+# SSH into the droplet
+doctl compute ssh $DROPLET_ID 

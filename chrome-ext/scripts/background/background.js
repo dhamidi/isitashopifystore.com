@@ -1,0 +1,19 @@
+import { checkDomain } from './api.js';
+import { getCachedResult, setCachedResult } from './cache.js';
+import { setupTabListeners } from './tabs.js';
+
+async function handleDomainChange(tabId, domain) {
+  let result = await getCachedResult(domain);
+  
+  if (!result) {
+    result = await checkDomain(domain);
+    await setCachedResult(domain, result);
+  }
+
+  await chrome.tabs.sendMessage(tabId, {
+    type: 'SHOPIFY_STATUS',
+    data: result
+  });
+}
+
+setupTabListeners(handleDomainChange); 

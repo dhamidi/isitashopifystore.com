@@ -1,5 +1,6 @@
 export function extractDomain(url) {
   try {
+    if (url.startsWith('chrome://')) return null;
     const { hostname } = new URL(url);
     return hostname;
   } catch {

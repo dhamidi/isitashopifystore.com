@@ -109,7 +109,10 @@ func resultPageHandler(w http.ResponseWriter, r *http.Request) {
 		LIMIT 1`, domain).Scan(&result.Status, &result.Reason)
 	
 	if err == sql.ErrNoRows {
-		// No analysis exists, show polling page
+		// No analysis exists, trigger background analysis
+		go analyzeDomain(domain)
+		
+		// Show polling page
 		tmpl := `
 <!DOCTYPE html>
 <html>
@@ -242,6 +245,13 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 		result.IsShopify = true
 	case "analysis_failed":
 		result.Status = "failed"
+		// Parse the error from the payload
+		var payload map[string]string
+		if err := json.Unmarshal([]byte(result.Reason), &payload); err == nil {
+			if errorMsg, ok := payload["error"]; ok {
+				result.Reason = errorMsg
+			}
+		}
 	default:
 		result.Status = "in_progress"
 	}

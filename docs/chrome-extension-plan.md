@@ -2,7 +2,7 @@
 
 This document outlines the step-by-step plan for implementing the Shopify store detector Chrome extension as specified in `chrome-extension.md`.
 
-## 1. Project Setup
+## 1. Project Setup - DONE
 
 ### Step 1.1: Create Extension Directory Structure
 - Create the `chrome-ext` directory at the project root
@@ -22,7 +22,7 @@ This document outlines the step-by-step plan for implementing the Shopify store 
 - Create resized versions at 128px, 48px, 32px, and 16px for different contexts
 - **Definition of Done**: All icon sizes exist in the `chrome-ext/assets/` directory
 
-## 2. Extension Configuration
+## 2. Extension Configuration - DONE
 
 ### Step 2.1: Create Manifest File
 - Create `chrome-ext/manifest.json` with the following configurations:
@@ -37,7 +37,7 @@ This document outlines the step-by-step plan for implementing the Shopify store 
 - Configure the manifest to use the Shopify icon for the extension
 - **Definition of Done**: Extension uses the Shopify icon when installed
 
-## 3. Background Script Implementation
+## 3. Background Script Implementation - DONE
 
 ### Step 3.1: Create API Service
 - Create `chrome-ext/scripts/background/api.js`
@@ -63,22 +63,18 @@ This document outlines the step-by-step plan for implementing the Shopify store 
 - Implement messaging between background and content scripts
 - **Definition of Done**: Background script orchestrates the detection process and communicates results to content scripts
 
-## 4. Content Script Implementation
+## 4. Content Script Implementation - DONE
 
-### Step 4.1: Create Icon Injector
-- Create `chrome-ext/scripts/content/icon.js`
+### Step 4.1: Create Content Script
+- Create `chrome-ext/scripts/content/content.js`
+- Implement message listeners to receive results from background script
 - Implement function to create and inject the Shopify icon into the page
 - Style the icon to appear in the top-right corner of the page
 - Add hover effects and positioning logic
-- **Definition of Done**: Function successfully injects a well-styled Shopify icon into webpages
+- Call icon injection when a positive result is received
+- **Definition of Done**: Content script successfully listens for messages and injects a well-styled icon when appropriate
 
-### Step 4.2: Create Main Content Script
-- Create `chrome-ext/scripts/content/content.js`
-- Implement message listeners to receive results from background script
-- Call icon injector when a positive result is received
-- **Definition of Done**: Content script successfully listens for messages and injects icon when appropriate
-
-### Step 4.3: Create Content Styles
+### Step 4.2: Create Content Styles
 - Create `chrome-ext/styles/content.css`
 - Define styles for the injected Shopify icon
 - Ensure proper z-index to appear above page content

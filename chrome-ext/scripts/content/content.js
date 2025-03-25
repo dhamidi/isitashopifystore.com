@@ -14,5 +14,4 @@ chrome.runtime.onMessage.addListener((message) => {
   if (message.type === 'SHOPIFY_STATUS' && message.data.isShopify) {
     injectShopifyIcon();
   }
-  return true;
 }); 

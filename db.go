@@ -17,7 +17,11 @@ func initDB() (*sql.DB, error) {
 		return nil, err
 	}
 
-	log.Println("Database connection established")
+	if _, err := db.Exec("PRAGMA journal_mode=WAL"); err != nil {
+		return nil, err
+	}
+
+	log.Println("Database connection established with WAL mode")
 	return db, nil
 }
 

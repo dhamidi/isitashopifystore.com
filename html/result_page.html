@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Is {{.Domain}} a Shopify Store?</title>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f5f5f5; }
+        .container { text-align: center; padding: 2rem; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .result { font-size: 4rem; font-weight: bold; margin: 1rem 0; }
+        .yes { color: #2ecc71; }
+        .no { color: #e74c3c; }
+        .reason { color: #666; margin-top: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Is {{.Domain}} a Shopify Store?</h1>
+        <div class="result {{if .IsShopify}}yes{{else}}no{{end}}">
+            {{if .IsShopify}}YES{{else}}NO{{end}}
+        </div>
+        {{if .IsShopify}}
+        <div class="reason">
+            {{.Reason}}
+        </div>
+        {{end}}
+    </div>
+</body>
+</html> 

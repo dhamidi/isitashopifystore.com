@@ -87,33 +87,7 @@ func landingPageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// For GET requests, show the landing page
-	tmpl := `
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Is it a Shopify Store?</title>
-    <style>
-        body { font-family: system-ui, -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f5f5f5; }
-        .container { text-align: center; padding: 2rem; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 500px; width: 90%; }
-        form { display: flex; gap: 0.5rem; margin-top: 1rem; }
-        input[type="url"] { flex: 1; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; }
-        button { padding: 0.5rem 1rem; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; }
-        button:hover { background: #2980b9; }
-        .error { color: #e74c3c; margin-top: 0.5rem; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Is it a Shopify Store?</h1>
-        <p>Enter a URL to check if it's a Shopify store</p>
-        <form method="POST">
-            <input type="url" name="url" placeholder="https://example.com" required>
-            <button type="submit">Check</button>
-        </form>
-    </div>
-</body>
-</html>`
-	t := template.Must(template.New("landing").Parse(tmpl))
+	t := template.Must(template.ParseFiles("html/landing_page.html"))
 	t.Execute(w, nil)
 }
 
@@ -160,41 +134,7 @@ func resultPageHandler(w http.ResponseWriter, r *http.Request) {
 		
 		// Show polling page
 		log.Printf("Rendering polling page for domain: %s", domain)
-		tmpl := `
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Analyzing {{.Domain}}</title>
-    <style>
-        body { font-family: system-ui, -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f5f5f5; }
-        .container { text-align: center; padding: 2rem; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite; margin: 20px auto; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Analyzing {{.Domain}}</h1>
-        <div class="spinner"></div>
-        <p>Checking if this is a Shopify store...</p>
-    </div>
-    <script>
-        function checkStatus() {
-            fetch('/status/{{.Domain}}')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'succeeded' || data.status === 'failed') {
-                        window.location.reload();
-                    } else {
-                        setTimeout(checkStatus, 1000);
-                    }
-                });
-        }
-        checkStatus();
-    </script>
-</body>
-</html>`
-		t := template.Must(template.New("polling").Parse(tmpl))
+		t := template.Must(template.ParseFiles("html/polling_page.html"))
 		t.Execute(w, struct{ Domain string }{domain})
 		return
 	}
@@ -218,35 +158,7 @@ func resultPageHandler(w http.ResponseWriter, r *http.Request) {
 	result.Domain = domain
 
 	// Render the result page
-	tmpl := `
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Is {{.Domain}} a Shopify Store?</title>
-    <style>
-        body { font-family: system-ui, -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f5f5f5; }
-        .container { text-align: center; padding: 2rem; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .result { font-size: 4rem; font-weight: bold; margin: 1rem 0; }
-        .yes { color: #2ecc71; }
-        .no { color: #e74c3c; }
-        .reason { color: #666; margin-top: 1rem; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Is {{.Domain}} a Shopify Store?</h1>
-        <div class="result {{if .IsShopify}}yes{{else}}no{{end}}">
-            {{if .IsShopify}}YES{{else}}NO{{end}}
-        </div>
-        {{if .IsShopify}}
-        <div class="reason">
-            {{.Reason}}
-        </div>
-        {{end}}
-    </div>
-</body>
-</html>`
-	t := template.Must(template.New("result").Parse(tmpl))
+	t := template.Must(template.ParseFiles("html/result_page.html"))
 	t.Execute(w, result)
 }
 

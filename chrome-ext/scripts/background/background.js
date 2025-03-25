@@ -19,6 +19,8 @@ chrome.runtime.onMessage.addListener((message, sender) => {
       messageQueue.delete(sender.tab.id);
       queuedMessages.forEach(msg => sendMessageToTab(sender.tab.id, msg));
     }
+  } else if (message.type === 'LOG') {
+    console.log(...[message.data.message, ...(message.data.args || [])]);
   }
 });
 

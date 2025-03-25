@@ -1,8 +1,16 @@
+function log(message, ...args) {
+  const logMessage = `[Content] ${message}`;
+  chrome.runtime.sendMessage({ 
+    type: 'LOG', 
+    data: { message: logMessage, args } 
+  });
+}
+
 function injectShopifyIcon() {
-  console.log('[Content] Attempting to inject Shopify icon');
+  log('Attempting to inject Shopify icon');
   const existingIcon = document.querySelector('.shopify-detector-icon');
   if (existingIcon) {
-    console.log('[Content] Icon already exists, skipping injection');
+    log('Icon already exists, skipping injection');
     return;
   }
 
@@ -12,17 +20,17 @@ function injectShopifyIcon() {
   icon.title = 'This is a Shopify store';
   
   document.body.appendChild(icon);
-  console.log('[Content] Successfully injected Shopify icon');
+  log('Successfully injected Shopify icon');
 }
 
 // Send ready signal when content script loads
-console.log('[Content] Sending ready signal');
+log('Sending ready signal');
 chrome.runtime.sendMessage({ type: 'CONTENT_SCRIPT_READY' });
 
 chrome.runtime.onMessage.addListener((message) => {
-  console.log('[Content] Received message:', message);
+  log('Received message:', message);
   if (message.type === 'SHOPIFY_STATUS' && message.data.is_shopify) {
-    console.log('[Content] Detected Shopify store, injecting icon');
+    log('Detected Shopify store, injecting icon');
     injectShopifyIcon();
   }
 }); 

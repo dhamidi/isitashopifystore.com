@@ -8,11 +8,13 @@ A web application that analyzes websites to determine if they are built on the S
 - Real-time analysis status updates
 - Event logging for analysis tracking
 - Simple and intuitive web interface
+- Chrome extension for instant website analysis
 
 ## Prerequisites
 
 - Go 1.x or later
 - SQLite3
+- For Chrome extension development: Chrome browser
 
 ## Building
 
@@ -29,38 +31,61 @@ go mod download
 
 3. Build the application:
 ```bash
-go build
+# For local development
+./tools/build local
+
+# For DigitalOcean deployment
+./tools/build digitalocean
 ```
 
 ## Running Locally
 
 Start the server:
 ```bash
-./isitashopifystore.com
+./isitashopifystore
 ```
 
 The application will be available at `http://localhost:8080`
 
+## Chrome Extension
+
+The Chrome extension allows users to instantly check if their current website is a Shopify store. 
+
+### Development Installation
+
+1. Navigate to the chrome extension directory:
+```bash
+cd chrome-ext
+```
+
+2. Open Chrome and go to `chrome://extensions/`
+3. Enable "Developer mode" in the top right corner
+4. Click "Load unpacked" and select the `chrome-ext` directory
+
+### Building for Production
+
+```bash
+cd chrome-ext
+./build.sh
+```
+
+This will create a zip file in the `dist` directory ready for Chrome Web Store submission.
+
 ## Deployment
 
-The application is designed to be deployed on any platform that supports Go applications. Here's a basic deployment guide:
+The application is deployed on DigitalOcean:
 
-1. Build the application for your target platform
-2. Ensure SQLite3 is installed on the server
-3. Set up environment variables if needed
-4. Run the application with appropriate process management (e.g., systemd, supervisor)
-
-### Docker Deployment
-
-1. Build the Docker image:
+1. Build the application for the target platform:
 ```bash
-docker build -t isitashopifystore .
+./tools/build digitalocean
 ```
 
-2. Run the container:
+2. Deploy to DigitalOcean:
 ```bash
-docker run -p 8080:8080 isitashopifystore
+./tools/deploy/push-to-do
 ```
+
+The deployment uses Caddy for HTTPS and reverse proxying.
 
 ## Project Structure
 
@@ -68,6 +93,10 @@ docker run -p 8080:8080 isitashopifystore
 - `handler.go` - HTTP request handlers
 - `analysis.go` - Shopify detection logic
 - `db.go` - Database operations and event logging
+- `chrome-ext/` - Chrome extension files
+- `html/` - HTML templates
+- `assets/` - Static assets
+- `tools/` - Build and deployment tools
 
 ## Contributing
 

@@ -5,7 +5,8 @@ set -e
 
 # Configuration
 OUTPUT_DIR="dist"
-ZIP_NAME="chrome-extension.zip"
+GIT_SHA=$(git rev-parse --short HEAD)
+ZIP_NAME="shopify-store-detector-${GIT_SHA}.zip"
 
 # Clean output directory
 rm -rf "$OUTPUT_DIR"

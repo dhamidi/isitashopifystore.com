@@ -2,3 +2,4 @@ tmp/
 *.db
 *.com
 isitashopifystore
+chrome-ext/dist/

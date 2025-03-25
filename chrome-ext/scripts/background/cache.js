@@ -13,10 +13,14 @@ export async function getCachedResult(domain) {
   return result;
 }
 
-export async function setCachedResult(domain, result) {
-  await chrome.storage.local.set({
+export function setDomainResult(domain, result) {
+  if (result.status === 'in_progress') {
+    return;
+  }
+  
+  chrome.storage.local.set({
     [domain]: {
-      result,
+      ...result,
       timestamp: Date.now()
     }
   });

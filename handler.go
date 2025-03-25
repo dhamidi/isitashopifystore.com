@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 )
 
@@ -28,28 +29,43 @@ func landingPageHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Get the URL from the form
-		inputURL := r.FormValue("url")
+		inputURL := strings.TrimSpace(r.FormValue("url"))
 		if inputURL == "" {
 			http.Error(w, "URL is required", http.StatusBadRequest)
 			return
 		}
 
-		// Ensure URL has a scheme
+		// Basic input sanitization
+		inputURL = strings.ToLower(inputURL)
+		inputURL = strings.TrimPrefix(inputURL, "www.")
+		
+		// If only a domain name is submitted, treat it as https
 		if !strings.HasPrefix(inputURL, "http://") && !strings.HasPrefix(inputURL, "https://") {
+			// Check if it's a valid domain name
+			if !isValidDomain(inputURL) {
+				http.Error(w, "Invalid domain name", http.StatusBadRequest)
+				return
+			}
 			inputURL = "https://" + inputURL
 		}
 
-		// Parse the URL
+		// Parse and validate the URL
 		parsedURL, err := url.Parse(inputURL)
 		if err != nil {
-			http.Error(w, "Invalid URL", http.StatusBadRequest)
+			http.Error(w, "Invalid URL format", http.StatusBadRequest)
 			return
 		}
 
-		// Extract domain
+		// Additional URL validation
+		if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
+			http.Error(w, "Only http and https URLs are allowed", http.StatusBadRequest)
+			return
+		}
+
+		// Extract and validate domain
 		domain := parsedURL.Hostname()
-		if domain == "" {
-			http.Error(w, "Invalid domain", http.StatusBadRequest)
+		if domain == "" || !isValidDomain(domain) {
+			http.Error(w, "Invalid domain name", http.StatusBadRequest)
 			return
 		}
 
@@ -297,4 +313,11 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Return the result
 	json.NewEncoder(w).Encode(result)
+}
+
+// isValidDomain checks if a string is a valid domain name
+func isValidDomain(domain string) bool {
+	// Basic domain validation regex
+	domainRegex := regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$`)
+	return domainRegex.MatchString(domain)
 }

@@ -1,0 +1,11 @@
+isitashopifystore.com {
+    reverse_proxy localhost:8080
+    tls admin@isitashopifystore.com
+    
+    header {
+        Strict-Transport-Security "max-age=31536000;"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+}

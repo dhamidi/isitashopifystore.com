@@ -1,10 +1,24 @@
 #!/bin/sh
-
-set -e
+set -euo pipefail
 
 BINARY_NAME="isitashopifystore"
 
-echo "Building application..."
-go build -o $BINARY_NAME
+case "${1:-local}" in
+  "digitalocean")
+    export CGO_ENABLED=1
+    export GOARCH=amd64
+    export GOOS=linux
+    export CC=x86_64-linux-musl-gcc
+    export CXX=x86_64-linux-musl-g++
+    go build -ldflags "-linkmode external -extldflags -static" -o "./${BINARY_NAME}" .
+    ;;
+  "local")
+    go build -o "./${BINARY_NAME}" .
+    ;;
+  *)
+    echo "Usage: $0 [digitalocean|local]"
+    exit 1
+    ;;
+esac
 
-echo "Build complete!" 
+echo "Build complete!"

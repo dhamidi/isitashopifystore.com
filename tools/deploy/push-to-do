@@ -1,0 +1,21 @@
+#!/bin/bash
+set -e
+
+# Build the image
+./tools/build digitalocean
+
+# Sync files to DigitalOcean droplet
+echo "Syncing files to DigitalOcean droplet..."
+rsync -avz --delete \
+  isitashopifystore \
+  deploy@isitashopifystore.com:/opt/isitashopifystore/
+rsync -avz --delete \
+  assets/ \
+  deploy@isitashopifystore.com:/opt/isitashopifystore/assets/
+rsync -avz --delete \
+  html/ \
+  deploy@isitashopifystore.com:/opt/isitashopifystore/html/
+rsync -avz --delete \
+  Caddyfile \
+  deploy@isitashopifystore.com:/opt/isitashopifystore/
+echo "Files synced successfully to DigitalOcean droplet" 

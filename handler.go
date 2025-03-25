@@ -16,10 +16,10 @@ import (
 var db *sql.DB
 
 type AnalysisResult struct {
-	Status  string `json:"status"`
-	Reason  string `json:"reason,omitempty"`
-	IsShopify bool `json:"is_shopify"`
-	Domain string `json:"domain,omitempty"`
+	Status    string `json:"status"`
+	Reason    string `json:"reason,omitempty"`
+	IsShopify bool   `json:"is_shopify"`
+	Domain    string `json:"domain,omitempty"`
 }
 
 func landingPageHandler(w http.ResponseWriter, r *http.Request) {
@@ -44,7 +44,7 @@ func landingPageHandler(w http.ResponseWriter, r *http.Request) {
 		// Basic input sanitization
 		inputURL = strings.ToLower(inputURL)
 		inputURL = strings.TrimPrefix(inputURL, "www.")
-		
+
 		// If only a domain name is submitted, treat it as https
 		if !strings.HasPrefix(inputURL, "http://") && !strings.HasPrefix(inputURL, "https://") {
 			// Check if it's a valid domain name
@@ -128,12 +128,12 @@ func resultPageHandler(w http.ResponseWriter, r *http.Request) {
 		WHERE domain = ? 
 		ORDER BY id DESC 
 		LIMIT 1`, domain).Scan(&result.Status, &result.Reason)
-	
+
 	if err == sql.ErrNoRows {
 		log.Printf("No analysis found for domain: %s, starting new analysis", domain)
 		// No analysis exists, trigger background analysis
 		go analyzeDomain(domain)
-		
+
 		// Show polling page
 		log.Printf("Rendering polling page for domain: %s", domain)
 		t := template.Must(template.ParseFiles("html/polling_page.html"))
@@ -202,10 +202,12 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 		WHERE domain = ? 
 		ORDER BY id DESC 
 		LIMIT 1`, domain).Scan(&result.Status, &result.Reason)
-	
+
 	if err == sql.ErrNoRows {
 		log.Printf("No analysis found for domain in status check: %s", domain)
-		// No analysis exists yet
+		// Start a new analysis in background
+		go analyzeDomain(domain)
+		// Return in_progress status
 		json.NewEncoder(w).Encode(AnalysisResult{
 			Status: "in_progress",
 		})
@@ -255,7 +257,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 
 func faviconHandler(w http.ResponseWriter, r *http.Request) {
 	path := filepath.Join("assets", "favicon-512.png")
-	
+
 	// Read the favicon file
 	favicon, err := os.ReadFile(path)
 	if err != nil {

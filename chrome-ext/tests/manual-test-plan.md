@@ -3,14 +3,15 @@
 ## Test Cases
 
 ### 1. Known Shopify Stores
-- [ ] Visit allbirds.com - should show icon
-- [ ] Visit gymshark.com - should show icon
-- [ ] Visit kylie.com - should show icon
+- [x] Visit allbirds.com - should show icon
+- [x] Visit gymshark.com - should show icon
+- [x] Visit kylie.com - should show icon
+    - the URL changed in the meantime: https://store.kylie.com/ does show the icon
 
 ### 2. Non-Shopify Stores
-- [ ] Visit amazon.com - should not show icon
-- [ ] Visit ebay.com - should not show icon
-- [ ] Visit walmart.com - should not show icon
+- [x] Visit amazon.com - should not show icon
+- [x] Visit ebay.com - should not show icon
+- [x] Visit walmart.com - should not show icon
 
 ### 3. Cache Behavior
 - [ ] Visit a Shopify store, verify icon appears
@@ -27,22 +28,22 @@
 - [ ] Test when API is down
 
 ### 5. Visual Tests
-- [ ] Icon appears in top-right corner
-- [ ] Icon doesn't overlap with page elements
-- [ ] Icon is visible on light backgrounds
-- [ ] Icon is visible on dark backgrounds
-- [ ] Hover effects work correctly
+- [x] Icon appears in top-right corner
+- [x] Icon doesn't overlap with page elements
+- [x] Icon is visible on light backgrounds
+- [x] Icon is visible on dark backgrounds
+- [x] Hover effects work correctly
 
 ### 6. Performance
-- [ ] Extension doesn't noticeably impact page load time
-- [ ] Icon appears within 1 second of page load
-- [ ] Cached results return instantly
+- [x] Extension doesn't noticeably impact page load time
+- [x] Icon appears within 1 second of page load
+- [x] Cached results return instantly
 
 ### 7. Browser States
-- [ ] Works in normal browsing mode
-- [ ] Works in incognito mode (if permitted)
-- [ ] Works across multiple windows
-- [ ] Works across multiple tabs
+- [x] Works in normal browsing mode
+- [x] Works in incognito mode (if permitted)
+- [x] Works across multiple windows
+- [x] Works across multiple tabs
 
 ## Test Execution Log
 

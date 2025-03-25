@@ -6,7 +6,7 @@ This document outlines a granular plan to build a Go-based website that checks i
 
 ## Task 1: Project Setup
 
-### 1.1 Create the Project Structure ✓
+### 1.1 Create the Project Structure - DONE
 
 - **Task:** Create a new directory (e.g., `isitashopifystore`) and add these files:
   - `main.go`
@@ -16,7 +16,7 @@ This document outlines a granular plan to build a Go-based website that checks i
 - **Definition of Done:** The project directory exists with the listed files; each file starts with `package main` and is empty or contains a basic skeleton.
 - **LLM Prompt:** Create a basic Go project structure in a new directory named 'isitashopifystore' with the files main.go, db.go, handler.go, and analysis.go. Each file should have 'package main' as the first line.
 
-### 1.2 Initialize a Go Module ✓
+### 1.2 Initialize a Go Module - DONE
 
 - **Task:** Run `go mod init isitashopifystore` to create the `go.mod` file.
 - **Definition of Done:** A `go.mod` file exists with the module name `isitashopifystore`.
@@ -24,13 +24,13 @@ This document outlines a granular plan to build a Go-based website that checks i
 
 ## Task 2: Database Setup (db.go)
 
-### 2.1 Setup SQLite Connection
+### 2.1 Setup SQLite Connection - DONE
 
 - **Task:** Write a function to open the SQLite database file (`isitashopifystore.db`).
 - **Definition of Done:** A function (e.g., `initDB()`) returns a valid `*sql.DB` connection.
 - **LLM Prompt:** In db.go, write a Go function 'initDB()' that opens a SQLite database file named 'isitashopifystore.db' using the database/sql package and the go-sqlite3 driver, then returns the connection.
 
-### 2.2 Create the Events Table
+### 2.2 Create the Events Table - DONE
 
 - **Task:** In the same file, write code to create an `events` table (if it doesn't exist) with these columns:
 - `id` (INTEGER, primary key, auto-increment)
@@ -41,7 +41,7 @@ This document outlines a granular plan to build a Go-based website that checks i
 - **Definition of Done:** The database creates the `events` table on startup if it doesn't already exist.
 - **LLM Prompt:** In db.go, write a function that creates an 'events' table with columns 'id' (INTEGER, primary key, auto-increment), 'domain' (TEXT), 'event_type' (TEXT), 'timestamp' (DATETIME), and 'payload' (JSON). Ensure the table is created if it does not already exist.
 
-### 2.3 Add an Event Logging Helper
+### 2.3 Add an Event Logging Helper - DONE
 
 - **Task:** Write a helper function `logEvent(domain, eventType string, payload interface{})` to insert events into the table.
 - **Definition of Done:** Calling `logEvent` successfully inserts an event into the database.
@@ -49,7 +49,7 @@ This document outlines a granular plan to build a Go-based website that checks i
 
 ## Task 3: HTTP Server Setup (main.go)
 
-### 3.1 Configure the HTTP Server
+### 3.1 Configure the HTTP Server - DONE
 
 - **Task:** Set up an HTTP server using `net/http` that routes requests to handlers.
 - **Steps:**
@@ -61,7 +61,7 @@ This document outlines a granular plan to build a Go-based website that checks i
 
 ## Task 4: Landing Page Implementation (handler.go)
 
-### 4.1 Create the Landing Page Handler
+### 4.1 Create the Landing Page Handler - DONE
 
 - **Task:** Implement `landingPageHandler` to render an HTML form with a URL input.
 - **Steps:**
@@ -70,7 +70,7 @@ This document outlines a granular plan to build a Go-based website that checks i
 - **Definition of Done:** Visiting `/` displays a page with the URL form.
 - **LLM Prompt:** In handler.go, create a function 'landingPageHandler' that writes an HTML page containing a form with a URL input field (using POST). The form should be simple and self-contained.
 
-### 4.2 Process Form Submission and Redirect
+### 4.2 Process Form Submission and Redirect - DONE
 
 - **Task:** Update the form handler to:
 - Parse the submitted URL.
@@ -81,7 +81,7 @@ This document outlines a granular plan to build a Go-based website that checks i
 
 ## Task 5: Result Page & Polling Implementation (handler.go)
 
-### 5.1 Create the Result Page Handler
+### 5.1 Create the Result Page Handler - DONE
 
 - **Task:** Implement `resultPageHandler` that:
 - Checks if an analysis result for the domain exists in the database.
@@ -90,7 +90,7 @@ This document outlines a granular plan to build a Go-based website that checks i
 - **Definition of Done:** Visiting `/{domain}` shows either the final result or a polling page while analysis is in progress.
 - **LLM Prompt:** In handler.go, implement a 'resultPageHandler' function that, for a given domain, checks if an analysis result exists. If it does, render a full-screen page showing 'yes' or 'no' (with the reason on success). If not, display an 'analysis in progress' message with JavaScript that polls the server every second.
 
-### 5.2 Create the Polling Endpoint
+### 5.2 Create the Polling Endpoint - DONE
 
 - **Task:** Implement `statusHandler` to:
 - Return the current analysis status as JSON.
@@ -100,7 +100,7 @@ This document outlines a granular plan to build a Go-based website that checks i
 
 ## Task 6: Analysis Logic Implementation (analysis.go)
 
-### 6.1 Implement the Domain Analysis Function
+### 6.1 Implement the Domain Analysis Function - DONE
 
 - **Task:** In `analysis.go`, write `analyzeDomain(domain string)` that:
 - Logs an "analysis started" event.
@@ -122,7 +122,7 @@ Searches the response body for 'myshopify' or 'cdn.shopify.com'.
 
 Logs an 'analysis succeeded' event with the matching keyword as the reason if found; otherwise, logs an 'analysis failed' event.
 
-### 6.2 Integrate Background Analysis
+### 6.2 Integrate Background Analysis - DONE
 
 - **Task:** Modify `resultPageHandler` to:
 - Check if the analysis for the domain exists.
@@ -132,15 +132,16 @@ Logs an 'analysis succeeded' event with the matching keyword as the reason if fo
 
 ## Task 7: Input Validation & Logging Enhancements
 
-### 7.1 Validate and Sanitize URL Input
+### 7.1 Validate and Sanitize URL Input – DONE
 
 - **Task:** Add code in the form submission handler to:
 - Validate that the submitted URL is well-formed.
+- If only a domain name is submitted, treat it as a https domain
 - Sanitize the input to prevent injection attacks.
 - **Definition of Done:** Only valid URLs are processed; invalid inputs result in a friendly error.
 - **LLM Prompt:** In handler.go, add input validation and sanitization logic for the submitted URL in the form handler. Ensure the URL is well-formed and safe before processing.
 
-### 7.2 Add Logging Statements
+### 7.2 Add Logging Statements – DONE
 
 - **Task:** Throughout the code (main.go, handler.go, analysis.go), add logging for:
 - Form submissions and redirections.
@@ -149,99 +150,3 @@ Logs an 'analysis succeeded' event with the matching keyword as the reason if fo
 - **Definition of Done:** Logs are printed to the console showing the flow of events and errors.
 - **LLM Prompt:** In the project files, insert logging statements using Go's log package to track key actions such as form submissions, redirections, analysis start, analysis success, and analysis failures.
 
-## Task 8: Testing & Finalization
-
-### 8.1 Local Testing
-
-- **Task:** Manually test:
-- The landing page displays correctly.
-- Form submissions redirect to `/{domain}`.
-- Polling correctly updates the status.
-- Analysis runs and logs events in the SQLite database.
-- **Definition of Done:** The application runs locally with all features (form, redirection, background analysis, and polling) functioning as expected.
-- **LLM Prompt:** Provide a guide in the project README on how to run and test the application locally, including testing the form submission, redirection, analysis functionality, and polling endpoint.
-
-### 8.2 Final Code Cleanup and Review
-
-- **Task:** Review all code files to:
-- Remove unused code and comments.
-- Ensure proper error handling and readability.
-- **Definition of Done:** The code is clean, well-commented, and production-ready.
-- **LLM Prompt:** Perform a final code review of the project and provide suggestions for code cleanup, ensuring that all files are well-commented, error handling is robust, and any unused code is removed.
-
-# Round 2: Further Granular Breakdown (Including File Names)
-
-## File: main.go
-
-- **Step 1:** Add `package main` and import packages (`net/http`, `log`, etc.).
-- **Step 2:** In `func main()`, call `initDB()` from db.go.
-- **Step 3:** Set up HTTP routes:
-- `http.HandleFunc("/", landingPageHandler)`
-- `http.HandleFunc("/status/", statusHandler)`
-- `http.HandleFunc("/<domain>", resultPageHandler)` (parse URL parameters appropriately)
-- **Step 4:** Start the server with `http.ListenAndServe`.
-- **Definition of Done:** main.go compiles and starts the HTTP server with proper routing.
-- **LLM Prompt:** In main.go, create a main() function that:
-
-Imports the necessary packages (net/http, log, etc.).
-
-Calls initDB() to initialize the SQLite database.
-
-Sets up HTTP routes for '/', '/status/', and '/<domain>' using appropriate handler functions.
-
-Starts the HTTP server with http.ListenAndServe.
-
-## File: db.go
-
-- **Step 1:** Add `package main` and import "database/sql", "log", etc.
-- **Step 2:** Implement `initDB()` to open/create 'isitashopifystore.db'.
-- **Step 3:** Execute a SQL statement to create the `events` table if not exists.
-- **Step 4:** Write the `logEvent(domain, eventType string, payload interface{})` function.
-- **Definition of Done:** db.go handles database connection and event logging.
-- **LLM Prompt:** In db.go, write the initDB() function to open 'isitashopifystore.db' and create an 'events' table with columns id, domain, event_type, timestamp, and payload. Also, implement logEvent(domain, eventType string, payload interface{}) to insert records into the events table.
-
-## File: handler.go
-
-- **Step 1:** Add `package main` and import "net/http", "html/template", "encoding/json", etc.
-- **Step 2:** Implement `landingPageHandler`:
-- Write HTML inline for the landing page form.
-- Process the POST submission: extract the URL, sanitize it, extract the domain, and redirect.
-- **Step 3:** Implement `resultPageHandler`:
-- Check for an existing analysis result from the database.
-- If found, render an HTML page showing "yes" (with reason) or "no".
-- If not found, render an "analysis in progress" page with embedded JavaScript to poll `/status/{domain}` every second.
-- **Step 4:** Implement `statusHandler`:
-- Query the database for the analysis status for the given domain.
-- Return a JSON response with fields: status and reason (if applicable).
-- **Definition of Done:** handler.go contains all HTTP handlers; each endpoint works as expected.
-- **LLM Prompt:** In handler.go, implement three functions:
-
-'landingPageHandler' to render an HTML form for URL input and handle its submission by extracting and sanitizing the URL and redirecting to '/{domain}'.
-
-'resultPageHandler' to check the analysis result for a domain and render either a result page or an 'analysis in progress' page with JavaScript polling.
-
-'statusHandler' to query the analysis status for a domain and return a JSON response.
-
-## File: analysis.go
-
-- **Step 1:** Add `package main` and import "net/http", "io/ioutil", "strings", etc.
-- **Step 2:** Implement `analyzeDomain(domain string)`:
-- Log "analysis started" using logEvent.
-- Perform an HTTP GET request (with redirect handling) to the domain.
-- Check if the final HTTP status is 200.
-- Read and search the response body for "myshopify" or "cdn.shopify.com".
-- Depending on the outcome, log either an "analysis succeeded" (with found keyword) or "analysis failed" event.
-- **Step 3:** Ensure the function is called in a background goroutine from resultPageHandler.
-- **Definition of Done:** analysis.go contains a working analyzeDomain function that logs events correctly.
-- **LLM Prompt:**  
-  In analysis.go, write a function 'analyzeDomain(domain string)' that:
-
-Logs an 'analysis started' event using logEvent.
-
-Performs an HTTP GET request to the given domain (following redirects).
-
-Checks that the final response has a 200 status code.
-
-Searches the response body for 'myshopify' or 'cdn.shopify.com'.
-
-Logs an 'analysis succeeded' event with the matching keyword as the reason if found, or logs an 'analysis failed' event otherwise. Ensure that this function is suitable for running in a goroutine.

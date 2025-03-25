@@ -1,12 +1,12 @@
 # Step-by-Step Implementation Plan for isitashopifystore.com
 
-This document outlines a granular plan to build a Go-based website that checks if a given URL is a Shopify store. The app will consist of a landing page with a URL form, a results page that shows “yes” or “no” based on the analysis, background analysis processing, and a SQLite-backed event log. All code will reside in a single flat Go package.
+This document outlines a granular plan to build a Go-based website that checks if a given URL is a Shopify store. The app will consist of a landing page with a URL form, a results page that shows "yes" or "no" based on the analysis, background analysis processing, and a SQLite-backed event log. All code will reside in a single flat Go package.
 
 ---
 
 ## Task 1: Project Setup
 
-### 1.1 Create the Project Structure
+### 1.1 Create the Project Structure ✓
 
 - **Task:** Create a new directory (e.g., `isitashopifystore`) and add these files:
   - `main.go`
@@ -16,7 +16,7 @@ This document outlines a granular plan to build a Go-based website that checks i
 - **Definition of Done:** The project directory exists with the listed files; each file starts with `package main` and is empty or contains a basic skeleton.
 - **LLM Prompt:** Create a basic Go project structure in a new directory named 'isitashopifystore' with the files main.go, db.go, handler.go, and analysis.go. Each file should have 'package main' as the first line.
 
-### 1.2 Initialize a Go Module
+### 1.2 Initialize a Go Module ✓
 
 - **Task:** Run `go mod init isitashopifystore` to create the `go.mod` file.
 - **Definition of Done:** A `go.mod` file exists with the module name `isitashopifystore`.
@@ -32,13 +32,13 @@ This document outlines a granular plan to build a Go-based website that checks i
 
 ### 2.2 Create the Events Table
 
-- **Task:** In the same file, write code to create an `events` table (if it doesn’t exist) with these columns:
+- **Task:** In the same file, write code to create an `events` table (if it doesn't exist) with these columns:
 - `id` (INTEGER, primary key, auto-increment)
 - `domain` (TEXT)
 - `event_type` (TEXT)
 - `timestamp` (DATETIME)
 - `payload` (JSON)
-- **Definition of Done:** The database creates the `events` table on startup if it doesn’t already exist.
+- **Definition of Done:** The database creates the `events` table on startup if it doesn't already exist.
 - **LLM Prompt:** In db.go, write a function that creates an 'events' table with columns 'id' (INTEGER, primary key, auto-increment), 'domain' (TEXT), 'event_type' (TEXT), 'timestamp' (DATETIME), and 'payload' (JSON). Ensure the table is created if it does not already exist.
 
 ### 2.3 Add an Event Logging Helper

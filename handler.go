@@ -24,6 +24,7 @@ func landingPageHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		// Parse the form data
 		if err := r.ParseForm(); err != nil {
+			log.Printf("Error parsing form: %v", err)
 			http.Error(w, "Failed to parse form", http.StatusBadRequest)
 			return
 		}
@@ -31,9 +32,12 @@ func landingPageHandler(w http.ResponseWriter, r *http.Request) {
 		// Get the URL from the form
 		inputURL := strings.TrimSpace(r.FormValue("url"))
 		if inputURL == "" {
+			log.Printf("Empty URL submitted")
 			http.Error(w, "URL is required", http.StatusBadRequest)
 			return
 		}
+
+		log.Printf("Processing URL submission: %s", inputURL)
 
 		// Basic input sanitization
 		inputURL = strings.ToLower(inputURL)
@@ -43,6 +47,7 @@ func landingPageHandler(w http.ResponseWriter, r *http.Request) {
 		if !strings.HasPrefix(inputURL, "http://") && !strings.HasPrefix(inputURL, "https://") {
 			// Check if it's a valid domain name
 			if !isValidDomain(inputURL) {
+				log.Printf("Invalid domain name submitted: %s", inputURL)
 				http.Error(w, "Invalid domain name", http.StatusBadRequest)
 				return
 			}
@@ -52,12 +57,14 @@ func landingPageHandler(w http.ResponseWriter, r *http.Request) {
 		// Parse and validate the URL
 		parsedURL, err := url.Parse(inputURL)
 		if err != nil {
+			log.Printf("Invalid URL format: %s, error: %v", inputURL, err)
 			http.Error(w, "Invalid URL format", http.StatusBadRequest)
 			return
 		}
 
 		// Additional URL validation
 		if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
+			log.Printf("Invalid URL scheme: %s", parsedURL.Scheme)
 			http.Error(w, "Only http and https URLs are allowed", http.StatusBadRequest)
 			return
 		}
@@ -65,14 +72,16 @@ func landingPageHandler(w http.ResponseWriter, r *http.Request) {
 		// Extract and validate domain
 		domain := parsedURL.Hostname()
 		if domain == "" || !isValidDomain(domain) {
+			log.Printf("Invalid domain extracted from URL: %s", inputURL)
 			http.Error(w, "Invalid domain name", http.StatusBadRequest)
 			return
 		}
 
 		// Log the form submission
-		log.Printf("Form submitted for domain: %s", domain)
+		log.Printf("Form submitted successfully for domain: %s", domain)
 
 		// Redirect to the domain-specific path
+		log.Printf("Redirecting to /%s", domain)
 		http.Redirect(w, r, "/"+domain, http.StatusSeeOther)
 		return
 	}
@@ -112,6 +121,7 @@ func resultPageHandler(w http.ResponseWriter, r *http.Request) {
 	// Extract domain from path
 	path := strings.TrimPrefix(r.URL.Path, "/")
 	if path == "" {
+		log.Printf("Empty path received")
 		http.Error(w, "Domain is required", http.StatusBadRequest)
 		return
 	}
@@ -127,9 +137,12 @@ func resultPageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if domain == "" {
+		log.Printf("Invalid domain extracted from path: %s", path)
 		http.Error(w, "Invalid domain", http.StatusBadRequest)
 		return
 	}
+
+	log.Printf("Processing result page request for domain: %s", domain)
 
 	// Check if analysis exists
 	var result AnalysisResult
@@ -141,10 +154,12 @@ func resultPageHandler(w http.ResponseWriter, r *http.Request) {
 		LIMIT 1`, domain).Scan(&result.Status, &result.Reason)
 	
 	if err == sql.ErrNoRows {
+		log.Printf("No analysis found for domain: %s, starting new analysis", domain)
 		// No analysis exists, trigger background analysis
 		go analyzeDomain(domain)
 		
 		// Show polling page
+		log.Printf("Rendering polling page for domain: %s", domain)
 		tmpl := `
 <!DOCTYPE html>
 <html>
@@ -239,6 +254,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 	// Extract domain from path
 	path := strings.TrimPrefix(r.URL.Path, "/status/")
 	if path == "" {
+		log.Printf("Empty path received in status handler")
 		http.Error(w, "Domain is required", http.StatusBadRequest)
 		return
 	}
@@ -254,9 +270,12 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if domain == "" {
+		log.Printf("Invalid domain extracted from path in status handler: %s", path)
 		http.Error(w, "Invalid domain", http.StatusBadRequest)
 		return
 	}
+
+	log.Printf("Processing status request for domain: %s", domain)
 
 	// Set JSON content type
 	w.Header().Set("Content-Type", "application/json")
@@ -271,6 +290,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 		LIMIT 1`, domain).Scan(&result.Status, &result.Reason)
 	
 	if err == sql.ErrNoRows {
+		log.Printf("No analysis found for domain in status check: %s", domain)
 		// No analysis exists yet
 		json.NewEncoder(w).Encode(AnalysisResult{
 			Status: "in_progress",
@@ -279,7 +299,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		log.Printf("Error checking analysis status: %v", err)
+		log.Printf("Error checking analysis status for domain %s: %v", domain, err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -288,9 +308,11 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 	switch result.Status {
 	case "analysis_started":
 		result.Status = "in_progress"
+		log.Printf("Analysis in progress for domain: %s", domain)
 	case "analysis_succeeded":
 		result.Status = "succeeded"
 		result.IsShopify = true
+		log.Printf("Analysis succeeded for domain: %s", domain)
 		// Parse the reason from the payload
 		var payload map[string]string
 		if err := json.Unmarshal([]byte(result.Reason), &payload); err == nil {
@@ -300,6 +322,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	case "analysis_failed":
 		result.Status = "failed"
+		log.Printf("Analysis failed for domain: %s", domain)
 		// Parse the error from the payload
 		var payload map[string]string
 		if err := json.Unmarshal([]byte(result.Reason), &payload); err == nil {
@@ -309,6 +332,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	default:
 		result.Status = "in_progress"
+		log.Printf("Unknown analysis status for domain %s: %s", domain, result.Status)
 	}
 
 	// Return the result

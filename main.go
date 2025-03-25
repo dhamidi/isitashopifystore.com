@@ -6,6 +6,8 @@ import (
 )
 
 func main() {
+	log.Println("Starting isitashopifystore.com server")
+
 	// Initialize database
 	var err error
 	db, err = initDB()
@@ -23,6 +25,12 @@ func main() {
 	mux.HandleFunc("/status/", statusHandler)
 	mux.HandleFunc("/{domain}", resultPageHandler)
 	mux.HandleFunc("/", landingPageHandler)
+
+	log.Println("HTTP routes configured:")
+	log.Println("  - GET  /              -> Landing page")
+	log.Println("  - POST /              -> Process URL submission")
+	log.Println("  - GET  /{domain}      -> Show analysis result")
+	log.Println("  - GET  /status/{domain} -> Check analysis status")
 
 	// Start the server
 	log.Println("Starting server on :8080")

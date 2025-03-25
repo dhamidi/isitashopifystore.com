@@ -9,7 +9,7 @@ export function extractDomain(url) {
 
 export function setupTabListeners(onDomainChange) {
   chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    if (changeInfo.status === 'complete' && tab.url) {
+    if (changeInfo.status === 'loading' && tab.url) {
       const domain = extractDomain(tab.url);
       if (domain) {
         onDomainChange(tabId, domain);

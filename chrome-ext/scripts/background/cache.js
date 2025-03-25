@@ -20,7 +20,7 @@ export function setCachedResult(domain, result) {
   
   chrome.storage.local.set({
     [domain]: {
-      ...result,
+      result,
       timestamp: Date.now()
     }
   });

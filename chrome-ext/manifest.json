@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Shopify Store Detector",
+  "version": "1.0.0",
+  "description": "Detects if a website is running on Shopify",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://isitashopifystore.com/*"
+  ],
+  "background": {
+    "service_worker": "scripts/background/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["scripts/content/content.js"],
+      "css": ["styles/content.css"]
+    }
+  ],
+  "icons": {
+    "16": "assets/shopify-icon-16.png",
+    "32": "assets/shopify-icon-32.png",
+    "48": "assets/shopify-icon-48.png",
+    "128": "assets/shopify-icon-128.png",
+    "512": "assets/shopify-icon-512.png"
+  }
+} 

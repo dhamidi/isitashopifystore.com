@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -249,6 +251,22 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Return the result
 	json.NewEncoder(w).Encode(result)
+}
+
+func faviconHandler(w http.ResponseWriter, r *http.Request) {
+	path := filepath.Join("assets", "favicon-512.png")
+	
+	// Read the favicon file
+	favicon, err := os.ReadFile(path)
+	if err != nil {
+		log.Printf("Error reading favicon: %v", err)
+		http.Error(w, "Favicon not found", http.StatusNotFound)
+		return
+	}
+
+	// Set content type and serve
+	w.Header().Set("Content-Type", "image/png")
+	w.Write(favicon)
 }
 
 // isValidDomain checks if a string is a valid domain name

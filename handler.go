@@ -16,6 +16,7 @@ type AnalysisResult struct {
 	Status  string `json:"status"`
 	Reason  string `json:"reason,omitempty"`
 	IsShopify bool `json:"is_shopify"`
+	Domain string `json:"domain,omitempty"`
 }
 
 func landingPageHandler(w http.ResponseWriter, r *http.Request) {
@@ -120,7 +121,7 @@ func resultPageHandler(w http.ResponseWriter, r *http.Request) {
 		SELECT event_type, payload 
 		FROM events 
 		WHERE domain = ? 
-		ORDER BY timestamp DESC 
+		ORDER BY id DESC 
 		LIMIT 1`, domain).Scan(&result.Status, &result.Reason)
 	
 	if err == sql.ErrNoRows {
@@ -183,6 +184,7 @@ func resultPageHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Determine if it's a Shopify store
 	result.IsShopify = result.Status == "analysis_succeeded"
+	result.Domain = domain
 
 	// Render the result page
 	tmpl := `
@@ -249,7 +251,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 		SELECT event_type, payload 
 		FROM events 
 		WHERE domain = ? 
-		ORDER BY timestamp DESC 
+		ORDER BY id DESC 
 		LIMIT 1`, domain).Scan(&result.Status, &result.Reason)
 	
 	if err == sql.ErrNoRows {
@@ -273,6 +275,13 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 	case "analysis_succeeded":
 		result.Status = "succeeded"
 		result.IsShopify = true
+		// Parse the reason from the payload
+		var payload map[string]string
+		if err := json.Unmarshal([]byte(result.Reason), &payload); err == nil {
+			if reason, ok := payload["reason"]; ok {
+				result.Reason = reason
+			}
+		}
 	case "analysis_failed":
 		result.Status = "failed"
 		// Parse the error from the payload

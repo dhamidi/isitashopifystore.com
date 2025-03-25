@@ -9,15 +9,16 @@ import (
 )
 
 func analyzeDomain(input string) {
-	// Extract domain from input (which might be a URL or just a domain)
-	parsedURL, err := url.Parse(input)
-	if err != nil {
-		// If parsing fails, try to use the input as a domain
-		parsedURL = &url.URL{Host: input}
+	// Extract domain from input
+	domain := input
+	if strings.Contains(input, "/") {
+		// If input contains slashes, try to parse as URL
+		parsedURL, err := url.Parse(input)
+		if err == nil && parsedURL.Hostname() != "" {
+			domain = parsedURL.Hostname()
+		}
 	}
-	
-	// Get the domain name
-	domain := parsedURL.Hostname()
+
 	if domain == "" {
 		logEvent(db, input, "analysis_failed", map[string]string{
 			"error": "Invalid domain: " + input,

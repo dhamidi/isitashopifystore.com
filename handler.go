@@ -99,13 +99,16 @@ func resultPageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Extract domain from path (which might be a URL)
-	parsedURL, err := url.Parse(path)
-	if err != nil {
-		// If parsing fails, try to use the path as a domain
-		parsedURL = &url.URL{Host: path}
+	// Extract domain from path
+	domain := path
+	if strings.Contains(path, "/") {
+		// If path contains slashes, try to parse as URL
+		parsedURL, err := url.Parse(path)
+		if err == nil && parsedURL.Hostname() != "" {
+			domain = parsedURL.Hostname()
+		}
 	}
-	domain := parsedURL.Hostname()
+
 	if domain == "" {
 		http.Error(w, "Invalid domain", http.StatusBadRequest)
 		return
@@ -113,7 +116,7 @@ func resultPageHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check if analysis exists
 	var result AnalysisResult
-	err = db.QueryRow(`
+	err := db.QueryRow(`
 		SELECT event_type, payload 
 		FROM events 
 		WHERE domain = ? 
@@ -222,13 +225,16 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Extract domain from path (which might be a URL)
-	parsedURL, err := url.Parse(path)
-	if err != nil {
-		// If parsing fails, try to use the path as a domain
-		parsedURL = &url.URL{Host: path}
+	// Extract domain from path
+	domain := path
+	if strings.Contains(path, "/") {
+		// If path contains slashes, try to parse as URL
+		parsedURL, err := url.Parse(path)
+		if err == nil && parsedURL.Hostname() != "" {
+			domain = parsedURL.Hostname()
+		}
 	}
-	domain := parsedURL.Hostname()
+
 	if domain == "" {
 		http.Error(w, "Invalid domain", http.StatusBadRequest)
 		return
@@ -239,7 +245,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check if analysis exists
 	var result AnalysisResult
-	err = db.QueryRow(`
+	err := db.QueryRow(`
 		SELECT event_type, payload 
 		FROM events 
 		WHERE domain = ? 

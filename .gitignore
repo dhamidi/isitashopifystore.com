@@ -1,5 +1,7 @@
 tmp/
 *.db
 *.com
-isitashopifystore
+isitashopifystore*
 chrome-ext/dist/
+.aider*
+.env

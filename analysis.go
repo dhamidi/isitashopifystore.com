@@ -38,14 +38,14 @@ func analyzeDomain(db *Database, input string) {
 		return
 	}
 
-	// Create URL for analysis
-	analysisURL := "https://" + domain
+	// Create URL for analysis with trailing slash
+	analysisURL := "https://" + domain + "/"
 	log.Printf("Making HTTP request to: %s", analysisURL)
 
-	// Create HTTP client that follows redirects (up to 3 times)
+	// Create HTTP client that follows redirects (up to 10 times)
 	client := &http.Client{
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			if len(via) >= 3 {
+			if len(via) >= 10 {
 				log.Printf("Max redirects reached for domain %s", domain)
 				return http.ErrUseLastResponse
 			}

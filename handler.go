@@ -13,7 +13,9 @@ import (
 	"strings"
 )
 
-var db *Database
+type Handler struct {
+	db *Database
+}
 
 type AnalysisResult struct {
 	Status    string `json:"status"`

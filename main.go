@@ -20,12 +20,15 @@ func main() {
 		log.Fatalf("Failed to create events table: %v", err)
 	}
 
+	// Create handler with database
+	h := &Handler{db: db}
+
 	// Set up HTTP routes with pattern matching
 	mux := http.NewServeMux()
-	mux.HandleFunc("/favicon.png", faviconHandler)
-	mux.HandleFunc("/status/", statusHandler)
-	mux.HandleFunc("/{domain}", resultPageHandler)
-	mux.HandleFunc("/", landingPageHandler)
+	mux.HandleFunc("/favicon.png", h.faviconHandler)
+	mux.HandleFunc("/status/", h.statusHandler)
+	mux.HandleFunc("/{domain}", h.resultPageHandler)
+	mux.HandleFunc("/", h.landingPageHandler)
 
 	log.Println("HTTP routes configured:")
 	log.Println("  - GET  /              -> Landing page")

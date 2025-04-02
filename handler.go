@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-var db *sql.DB
+var db *Database
 
 type AnalysisResult struct {
 	Status    string `json:"status"`
@@ -122,12 +122,7 @@ func resultPageHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check if analysis exists
 	var result AnalysisResult
-	err := db.QueryRow(`
-		SELECT event_type, payload 
-		FROM events 
-		WHERE domain = ? 
-		ORDER BY id DESC 
-		LIMIT 1`, domain).Scan(&result.Status, &result.Reason)
+	result.Status, result.Reason, err = db.GetLatestAnalysisResult(domain)
 
 	if err == sql.ErrNoRows {
 		log.Printf("No analysis found for domain: %s, starting new analysis", domain)

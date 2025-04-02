@@ -9,14 +9,14 @@ func main() {
 	log.Println("Starting isitashopifystore.com server")
 
 	// Initialize database
-	var err error
-	db, err = initDB()
+	db, err := NewDatabase("isitashopifystore.db")
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
+	defer db.Close()
 
 	// Create events table if it doesn't exist
-	if err := createEventsTable(db); err != nil {
+	if err := db.CreateEventsTable(); err != nil {
 		log.Fatalf("Failed to create events table: %v", err)
 	}
 

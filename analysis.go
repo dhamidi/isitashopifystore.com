@@ -32,7 +32,7 @@ func analyzeDomain(input string) {
 	log.Printf("Extracted domain for analysis: %s", domain)
 
 	// Log analysis started
-	if err := logEvent(db, domain, "analysis_started", nil); err != nil {
+	if err := db.LogEvent(domain, "analysis_started", nil); err != nil {
 		log.Printf("Error logging analysis start for domain %s: %v", domain, err)
 		return
 	}
@@ -57,7 +57,7 @@ func analyzeDomain(input string) {
 	resp, err := client.Get(analysisURL)
 	if err != nil {
 		log.Printf("HTTP request failed for domain %s: %v", domain, err)
-		logEvent(db, domain, "analysis_failed", map[string]string{
+		db.LogEvent(domain, "analysis_failed", map[string]string{
 			"error": "Failed to make HTTP request: " + err.Error(),
 		})
 		return
@@ -67,7 +67,7 @@ func analyzeDomain(input string) {
 	// Check if response is 200
 	if resp.StatusCode != http.StatusOK {
 		log.Printf("Non-200 status code received for domain %s: %s", domain, resp.Status)
-		logEvent(db, domain, "analysis_failed", map[string]string{
+		db.LogEvent(domain, "analysis_failed", map[string]string{
 			"error": "HTTP status code not 200: " + resp.Status,
 		})
 		return
@@ -79,7 +79,7 @@ func analyzeDomain(input string) {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Printf("Failed to read response body for domain %s: %v", domain, err)
-		logEvent(db, domain, "analysis_failed", map[string]string{
+		db.LogEvent(domain, "analysis_failed", map[string]string{
 			"error": "Failed to read response body: " + err.Error(),
 		})
 		return
@@ -89,7 +89,7 @@ func analyzeDomain(input string) {
 	bodyStr := string(body)
 	if strings.Contains(bodyStr, "myshopify") {
 		log.Printf("Found 'myshopify' indicator for domain %s", domain)
-		logEvent(db, domain, "analysis_succeeded", map[string]string{
+		db.LogEvent(domain, "analysis_succeeded", map[string]string{
 			"reason": "Found 'myshopify' in page content",
 		})
 		return
@@ -97,7 +97,7 @@ func analyzeDomain(input string) {
 
 	if strings.Contains(bodyStr, "cdn.shopify.com") {
 		log.Printf("Found 'cdn.shopify.com' indicator for domain %s", domain)
-		logEvent(db, domain, "analysis_succeeded", map[string]string{
+		db.LogEvent(domain, "analysis_succeeded", map[string]string{
 			"reason": "Found 'cdn.shopify.com' in page content",
 		})
 		return
@@ -105,7 +105,7 @@ func analyzeDomain(input string) {
 
 	// No Shopify indicators found
 	log.Printf("No Shopify indicators found for domain %s", domain)
-	logEvent(db, domain, "analysis_failed", map[string]string{
+	db.LogEvent(domain, "analysis_failed", map[string]string{
 		"error": "No Shopify indicators found in page content",
 	})
 } 

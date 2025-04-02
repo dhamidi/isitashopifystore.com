@@ -122,6 +122,7 @@ func resultPageHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check if analysis exists
 	var result AnalysisResult
+	var err error
 	result.Status, result.Reason, err = db.GetLatestAnalysisResult(domain)
 
 	if err == sql.ErrNoRows {
@@ -191,7 +192,8 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check if analysis exists
 	var result AnalysisResult
-	result.Status, result.Reason, err := db.GetStatusResult(domain)
+	var err error
+	result.Status, result.Reason, err = db.GetStatusResult(domain)
 	
 	if err == sql.ErrNoRows {
 		log.Printf("No analysis found for domain in status check: %s", domain)

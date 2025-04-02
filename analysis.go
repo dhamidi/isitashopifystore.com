@@ -23,7 +23,7 @@ func analyzeDomain(input string) {
 
 	if domain == "" {
 		log.Printf("Failed to extract valid domain from input: %s", input)
-		logEvent(db, input, "analysis_failed", map[string]string{
+		db.LogEvent(input, "analysis_failed", map[string]string{
 			"error": "Invalid domain: " + input,
 		})
 		return

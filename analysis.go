@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func analyzeDomain(input string) {
+func analyzeDomain(db *Database, input string) {
 	log.Printf("Starting domain analysis for input: %s", input)
 
 	// Extract domain from input

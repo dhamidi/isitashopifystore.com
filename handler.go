@@ -24,7 +24,7 @@ type AnalysisResult struct {
 	Domain    string `json:"domain,omitempty"`
 }
 
-func landingPageHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) landingPageHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		// Parse the form data
 		if err := r.ParseForm(); err != nil {
@@ -95,7 +95,7 @@ func landingPageHandler(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, nil)
 }
 
-func resultPageHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) resultPageHandler(w http.ResponseWriter, r *http.Request) {
 	// Extract domain from path
 	path := strings.TrimPrefix(r.URL.Path, "/")
 	if path == "" {
@@ -125,12 +125,12 @@ func resultPageHandler(w http.ResponseWriter, r *http.Request) {
 	// Check if analysis exists
 	var result AnalysisResult
 	var err error
-	result.Status, result.Reason, err = db.GetLatestAnalysisResult(domain)
+	result.Status, result.Reason, err = h.db.GetLatestAnalysisResult(domain)
 
 	if err == sql.ErrNoRows {
 		log.Printf("No analysis found for domain: %s, starting new analysis", domain)
 		// No analysis exists, trigger background analysis
-		go analyzeDomain(domain)
+		go analyzeDomain(h.db, domain)
 
 		// Show polling page
 		log.Printf("Rendering polling page for domain: %s", domain)
@@ -162,7 +162,7 @@ func resultPageHandler(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, result)
 }
 
-func statusHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) statusHandler(w http.ResponseWriter, r *http.Request) {
 	// Extract domain from path
 	path := strings.TrimPrefix(r.URL.Path, "/status/")
 	if path == "" {
@@ -195,12 +195,12 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 	// Check if analysis exists
 	var result AnalysisResult
 	var err error
-	result.Status, result.Reason, err = db.GetStatusResult(domain)
+	result.Status, result.Reason, err = h.db.GetStatusResult(domain)
 	
 	if err == sql.ErrNoRows {
 		log.Printf("No analysis found for domain in status check: %s", domain)
 		// Start a new analysis in background
-		go analyzeDomain(domain)
+		go analyzeDomain(h.db, domain)
 		// Return in_progress status
 		json.NewEncoder(w).Encode(AnalysisResult{
 			Status: "in_progress",
@@ -249,7 +249,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(result)
 }
 
-func faviconHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) faviconHandler(w http.ResponseWriter, r *http.Request) {
 	path := filepath.Join("assets", "favicon-512.png")
 
 	// Read the favicon file

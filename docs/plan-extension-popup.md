@@ -112,14 +112,14 @@ h1 {
 }
 
 .status-indicator.shopify {
-  background-color: #95bf47;
+  background-color: #95BF47;
   color: white;
 }
 
 .status-indicator.not-shopify {
   background-color: white;
-  color: #ff0000;
-  border: 1px solid #ff0000;
+  color: #e74c3c;
+  border: 1px solid #e74c3c;
 }
 
 .status-indicator.loading {
@@ -374,7 +374,7 @@ chrome-ext/
 1. **Color Scheme:**
 
    - Use Shopify green (#95BF47) for positive indicators and buttons
-   - Use red (#FF0000) for negative indicators
+   - Use red (#e74c3c) for negative indicators
 
 2. **Error Handling:**
 

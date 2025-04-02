@@ -3,65 +3,57 @@
 ## Overview
 Move all database operations into db.go to create a clean separation of concerns and make the database layer more maintainable.
 
-## Current State
-- Database initialization in db.go
-- Database operations scattered across handler.go
-- Global db variable in handler.go
+## Current State Analysis
+Currently we have these database operations:
+1. initDB() - Creates database connection
+2. createEventsTable() - Creates events table
+3. logEvent() - Logs events to database
+4. Direct SQL queries in handler.go for:
+   - Checking analysis status
+   - Reading analysis results
 
 ## Step-by-Step Refactoring Plan
 
-### 1. Create Database Types
+### 1. Create Database Type
 In db.go, define:
-- `type Database struct { db *sql.DB }`
-- `type AnalysisRecord struct` to match database schema
-
-### 2. Create Database Methods
-Add these functions to db.go:
 ```go
-func NewDatabase(dbPath string) (*Database, error)
-func (d *Database) Close() error
-func (d *Database) GetAnalysisResult(domain string) (*AnalysisResult, error)
-func (d *Database) SaveAnalysisResult(domain string, result *AnalysisResult) error
-func (d *Database) UpdateAnalysisStatus(domain, status string) error
+type Database struct {
+    db *sql.DB
+}
 ```
 
-### 3. Update Database Schema
-Add new table for analysis results:
-```sql
-CREATE TABLE IF NOT EXISTS analysis_results (
-    domain TEXT PRIMARY KEY,
-    status TEXT NOT NULL,
-    reason TEXT,
-    is_shopify BOOLEAN,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-)
+### 2. Move Existing Functions
+Convert existing functions to methods:
+```go
+func NewDatabase(dbPath string) (*Database, error)  // renamed from initDB
+func (d *Database) CreateEventsTable() error       // renamed from createEventsTable
+func (d *Database) LogEvent(domain, eventType string, payload interface{}) error
 ```
 
-### 4. Modify Existing Code
+### 3. Add New Methods
+Move queries from handler.go into new methods:
+```go
+func (d *Database) GetLatestAnalysisResult(domain string) (string, string, error)
+```
+
+### 4. Update Code Structure
 1. Remove global `db` variable from handler.go
-2. Update main.go to use new Database type
-3. Update all handlers to use Database methods
+2. Update main.go to use Database type
+3. Update handlers to use Database methods
 4. Remove direct SQL queries from handlers
 
 ### 5. Testing Steps
-1. Create test database file
-2. Test each new database method
-3. Verify all handlers work with new database layer
-4. Check error handling
-5. Verify logging still works
-
-### 6. Deployment Considerations
-1. Create database migration script
-2. Plan deployment sequence to avoid downtime
-3. Update documentation
+1. Test each database method
+2. Verify all handlers work with new database layer
+3. Check error handling
+4. Verify logging still works
 
 ## Implementation Order
-1. Create new types and interface
-2. Implement database methods one at a time
-3. Update handlers one at a time
-4. Test thoroughly
-5. Deploy with careful migration
+1. Create Database type
+2. Convert existing functions to methods
+3. Add new methods for handler queries
+4. Update handlers one at a time
+5. Test thoroughly
 
 ## Success Criteria
 - All database operations moved to db.go

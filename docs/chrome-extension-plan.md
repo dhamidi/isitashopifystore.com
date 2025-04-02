@@ -80,7 +80,7 @@ This document outlines the step-by-step plan for implementing the Shopify store 
 - Ensure proper z-index to appear above page content
 - **Definition of Done**: CSS file includes all necessary styles for the icon
 
-## 5. Testing
+## 5. Testing - DONE
 
 ### Step 5.1: Manual Test Plan
 - Create `chrome-ext/tests/manual-test-plan.md`
@@ -98,7 +98,7 @@ This document outlines the step-by-step plan for implementing the Shopify store 
 
 ## 6. Packaging and Distribution
 
-### Step 6.1: Create Build Script
+### Step 6.1: Create Build Script - DONE
 - Create `chrome-ext/build.sh` script
 - Implement logic to:
   - Clean output directory
@@ -106,7 +106,7 @@ This document outlines the step-by-step plan for implementing the Shopify store 
   - Zip contents for Chrome Web Store submission
 - **Definition of Done**: Script successfully creates a deployable zip file
 
-### Step 6.2: Document Installation Process
+### Step 6.2: Document Installation Process - DONE
 - Create `chrome-ext/README.md`
 - Document how to:
   - Install the extension in developer mode

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 )
 
 func analyzeDomain(db *Database, input string) {
@@ -103,9 +104,58 @@ func analyzeDomain(db *Database, input string) {
 		return
 	}
 
-	// No Shopify indicators found
-	log.Printf("No Shopify indicators found for domain %s", domain)
+	// No Shopify indicators found in main page, try checking the checkout page
+	log.Printf("No Shopify indicators found in main page for domain %s, checking checkout page", domain)
+	
+	// Construct checkout URL
+	checkoutURL := "https://checkout." + domain + "/checkout/cn"
+	log.Printf("Making HTTP request to checkout URL: %s", checkoutURL)
+	
+	// Create a new client with shorter timeout for checkout request
+	checkoutClient := &http.Client{
+		Timeout: 10 * time.Second,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			if len(via) >= 2 {
+				return http.ErrUseLastResponse
+			}
+			return nil
+		},
+	}
+	
+	// Make the request to checkout URL
+	checkoutResp, err := checkoutClient.Get(checkoutURL)
+	if err != nil {
+		log.Printf("Checkout HTTP request failed for domain %s: %v", domain, err)
+		db.LogEvent(domain, "analysis_failed", map[string]string{
+			"error": "No Shopify indicators found in page content and checkout check failed",
+		})
+		return
+	}
+	defer checkoutResp.Body.Close()
+	
+	// Check for Shopify-specific header
+	shopifyID := checkoutResp.Header.Get("x-shopid")
+	if shopifyID != "" {
+		log.Printf("Found 'x-shopid' header in checkout response for domain %s: %s", domain, shopifyID)
+		db.LogEvent(domain, "analysis_succeeded", map[string]string{
+			"reason": "Found 'x-shopid' header in checkout page response",
+			"shopify_id": shopifyID,
+		})
+		return
+	}
+	
+	// Check for other Shopify indicators in checkout response
+	if strings.Contains(checkoutResp.Header.Get("Server"), "Shopify") {
+		log.Printf("Found 'Shopify' in Server header for domain %s", domain)
+		db.LogEvent(domain, "analysis_succeeded", map[string]string{
+			"reason": "Found 'Shopify' in Server header of checkout page",
+		})
+		return
+	}
+	
+	// No Shopify indicators found in main page or checkout
+	log.Printf("No Shopify indicators found for domain %s in main page or checkout", domain)
 	db.LogEvent(domain, "analysis_failed", map[string]string{
-		"error": "No Shopify indicators found in page content",
+		"error": "No Shopify indicators found in page content or checkout page",
 	})
-} 
+}

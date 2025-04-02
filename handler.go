@@ -191,13 +191,8 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check if analysis exists
 	var result AnalysisResult
-	err := db.QueryRow(`
-		SELECT event_type, payload 
-		FROM events 
-		WHERE domain = ? 
-		ORDER BY id DESC 
-		LIMIT 1`, domain).Scan(&result.Status, &result.Reason)
-
+	result.Status, result.Reason, err := db.GetStatusResult(domain)
+	
 	if err == sql.ErrNoRows {
 		log.Printf("No analysis found for domain in status check: %s", domain)
 		// Start a new analysis in background

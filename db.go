@@ -84,6 +84,18 @@ func (d *Database) GetLatestAnalysisResult(domain string) (string, string, error
 	return eventType, payload, err
 }
 
+// GetStatusResult retrieves the latest event type and payload for a domain
+func (d *Database) GetStatusResult(domain string) (string, string, error) {
+	var eventType, payload string
+	err := d.db.QueryRow(`
+		SELECT event_type, payload 
+		FROM events 
+		WHERE domain = ? 
+		ORDER BY id DESC 
+		LIMIT 1`, domain).Scan(&eventType, &payload)
+	return eventType, payload, err
+}
+
 // Close closes the database connection
 func (d *Database) Close() error {
 	return d.db.Close()

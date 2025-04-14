@@ -16,9 +16,9 @@ The `handler.go` file defines HTTP handlers for the application's routes, managi
    - `AnalysisResult`: Struct for storing and transmitting analysis results.
 
 5. **HTTP Handlers**:
-   - `landingPageHandler`: Handles GET requests to the landing page and processes URL form submissions.
-   - `resultPageHandler`: Displays analysis results for a specific domain.
-   - `statusHandler`: Returns JSON status information for a domain's analysis.
+   - `landingPageHandler`: Handles GET requests to the landing page and processes URL form submissions. On POST, it extracts the domain, attempts to normalize it, and redirects to the result page path using the *original* domain input.
+   - `resultPageHandler`: Handles requests like `/{domain}`. Extracts the domain from the path, normalizes it to the *base domain* (removes `www.`), and queries the database using the *base domain*. If no result is found, it triggers a background analysis using the *original* domain input and shows the polling page. If a result is found, it renders the result page (`YES`/`NO`) based on the stored `analysis_succeeded` or `analysis_failed` status.
+   - `statusHandler`: Handles requests like `/status/{domain}`. Extracts the domain from the path, normalizes it to the *base domain*, and queries the database for the latest event using the *base domain*. Returns a JSON response indicating the status (`in_progress`, `succeeded`, `failed`). If no analysis is found for the base domain, it triggers a new background analysis using the *original* domain input.
    - `faviconHandler`: Serves the application's favicon.
 
 6. **Helper Functions**:

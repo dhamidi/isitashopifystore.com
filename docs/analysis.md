@@ -7,16 +7,24 @@ The `analysis.go` file contains the core logic for determining whether a given d
 
 1. **Package Declaration**: Part of the `main` package.
 
-2. **Import Section**: Imports packages for I/O operations, logging, HTTP requests, URL parsing, and string manipulation.
+2. **Import Section**: Imports packages for I/O operations, logging, HTTP requests, URL parsing, string manipulation, and formatting.
 
-3. **Main Analysis Function**:
-   - `analyzeDomain(input string)`: Performs the Shopify detection analysis on a given domain.
-     - Extracts a valid domain from the input
-     - Logs the start of the analysis process
-     - Makes an HTTP request to the domain
-     - Reads the response body
-     - Searches for Shopify indicators in the HTML content
-     - Logs the results of the analysis
+3. **Helper Function**:
+   - `performSingleAnalysis(analysisURL string) (isShopify bool, payload map[string]string)`:
+     - Takes a single URL (e.g., `https://example.com/` or `https://www.example.com/`).
+     - Performs an HTTP GET request, following redirects.
+     - Checks the response body for "myshopify" or "cdn.shopify.com".
+     - If not found, attempts a request to the corresponding checkout URL (`https://checkout.{domain}/...`) and checks for `x-shopid` or `Server: Shopify` headers.
+     - Returns whether a Shopify indicator was found and a payload map containing details (reason, indicator, source URL, etc.).
+
+4. **Main Analysis Function**:
+   - `analyzeDomain(db *Database, input string)`: Orchestrates the Shopify detection analysis.
+     - Extracts the *base domain* from the input (e.g., `example.com` from `www.example.com`).
+     - Logs the `analysis_started` event for the *base domain*.
+     - Determines the URLs to check (base domain and www-prefixed domain).
+     - Calls `performSingleAnalysis` for each URL sequentially.
+     - If any call to `performSingleAnalysis` returns `isShopify = true`, logs `analysis_succeeded` for the *base domain* using the payload from the successful check.
+     - If all calls fail, logs `analysis_failed` for the *base domain* using the payload from the first failed check.
 
 ## Opportunities for Abstraction
 

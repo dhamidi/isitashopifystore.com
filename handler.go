@@ -122,25 +122,31 @@ func (h *Handler) resultPageHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("Processing result page request for domain: %s", domain)
 
-	// Check if analysis exists
+	// Normalize domain to base domain (remove www.) before checking DB
+	baseDomain := strings.TrimPrefix(domain, "www.")
+	log.Printf("Normalized to base domain for result check: %s", baseDomain)
+
+	// Check if analysis exists for the base domain
 	var result AnalysisResult
 	var err error
-	result.Status, result.Reason, err = h.db.GetLatestAnalysisResult(domain)
+	// Use baseDomain to query the database
+	result.Status, result.Reason, err = h.db.GetLatestAnalysisResult(baseDomain)
 
 	if err == sql.ErrNoRows {
-		log.Printf("No analysis found for domain: %s, starting new analysis", domain)
-		// No analysis exists, trigger background analysis
+		log.Printf("No analysis found for base domain: %s (original: %s), starting new analysis", baseDomain, domain)
+		// No analysis exists, trigger background analysis using the original domain/input
 		go analyzeDomain(h.db, domain)
 
-		// Show polling page
+		// Show polling page, still using the original requested domain for the template
 		log.Printf("Rendering polling page for domain: %s", domain)
 		t := template.Must(template.ParseFiles("html/polling_page.html"))
+		// Pass the original requested domain to the template
 		t.Execute(w, struct{ Domain string }{domain})
 		return
 	}
 
 	if err != nil {
-		log.Printf("Error checking analysis status: %v", err)
+		log.Printf("Error checking analysis status for base domain %s (original: %s): %v", baseDomain, domain, err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -155,6 +161,7 @@ func (h *Handler) resultPageHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Determine if it's a Shopify store
 	result.IsShopify = result.Status == "analysis_succeeded"
+	// Use the *original* requested domain for display purposes
 	result.Domain = domain
 
 	// Render the result page
@@ -189,17 +196,21 @@ func (h *Handler) statusHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("Processing status request for domain: %s", domain)
 
+	// Normalize domain to base domain (remove www.)
+	baseDomain := strings.TrimPrefix(domain, "www.")
+	log.Printf("Normalized to base domain for status check: %s", baseDomain)
+
 	// Set JSON content type
 	w.Header().Set("Content-Type", "application/json")
 
 	// Check if analysis exists
 	var result AnalysisResult
 	var err error
-	result.Status, result.Reason, err = h.db.GetStatusResult(domain)
-	
+	result.Status, result.Reason, err = h.db.GetStatusResult(baseDomain)
+
 	if err == sql.ErrNoRows {
-		log.Printf("No analysis found for domain in status check: %s", domain)
-		// Start a new analysis in background
+		log.Printf("No analysis found for base domain in status check: %s (original: %s)", baseDomain, domain)
+		// Start a new analysis in background using the original domain/input
 		go analyzeDomain(h.db, domain)
 		// Return in_progress status
 		json.NewEncoder(w).Encode(AnalysisResult{
@@ -209,7 +220,7 @@ func (h *Handler) statusHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		log.Printf("Error checking analysis status for domain %s: %v", domain, err)
+		log.Printf("Error checking analysis status for base domain %s (original: %s): %v", baseDomain, domain, err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -218,11 +229,11 @@ func (h *Handler) statusHandler(w http.ResponseWriter, r *http.Request) {
 	switch result.Status {
 	case "analysis_started":
 		result.Status = "in_progress"
-		log.Printf("Analysis in progress for domain: %s", domain)
+		log.Printf("Analysis in progress for base domain: %s (original: %s)", baseDomain, domain)
 	case "analysis_succeeded":
 		result.Status = "succeeded"
 		result.IsShopify = true
-		log.Printf("Analysis succeeded for domain: %s", domain)
+		log.Printf("Analysis succeeded for base domain: %s (original: %s)", baseDomain, domain)
 		// Parse the reason from the payload
 		var payload map[string]string
 		if err := json.Unmarshal([]byte(result.Reason), &payload); err == nil {
@@ -232,7 +243,7 @@ func (h *Handler) statusHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	case "analysis_failed":
 		result.Status = "failed"
-		log.Printf("Analysis failed for domain: %s", domain)
+		log.Printf("Analysis failed for base domain: %s (original: %s)", baseDomain, domain)
 		// Parse the error from the payload
 		var payload map[string]string
 		if err := json.Unmarshal([]byte(result.Reason), &payload); err == nil {
@@ -242,7 +253,7 @@ func (h *Handler) statusHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	default:
 		result.Status = "in_progress"
-		log.Printf("Unknown analysis status for domain %s: %s", domain, result.Status)
+		log.Printf("Unknown analysis status for base domain %s (original: %s): %s", baseDomain, domain, result.Status)
 	}
 
 	// Return the result

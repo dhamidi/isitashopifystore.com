@@ -1,11 +1,11 @@
-const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
+const CACHE_EXPIRY = 24 * 60 * 60; // 24 hours in seconds
 
 export async function getCachedResult(domain) {
   const data = await chrome.storage.local.get(domain);
   if (!data[domain]) return null;
 
   const { result, timestamp } = data[domain];
-  if (Date.now() - timestamp > CACHE_EXPIRY) {
+  if (Math.floor(Date.now() / 1000) - timestamp > CACHE_EXPIRY) {
     await chrome.storage.local.remove(domain);
     return null;
   }
@@ -21,7 +21,7 @@ export function setCachedResult(domain, result) {
   chrome.storage.local.set({
     [domain]: {
       result,
-      timestamp: Date.now()
+      timestamp: Math.floor(Date.now() / 1000)
     }
   });
 } 

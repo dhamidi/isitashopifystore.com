@@ -7,8 +7,20 @@ const readyTabs = new Set();
 // Queue messages for tabs not ready yet
 const messageQueue = new Map();
 
-// Handle content script ready signals
-chrome.runtime.onMessage.addListener((message, sender) => {
+// Function to clear the entire cache
+async function clearAllCache() {
+  try {
+    await chrome.storage.local.clear();
+    console.log('[Background] Cache cleared successfully.');
+    return { success: true };
+  } catch (error) {
+    console.error('[Background] Error clearing cache:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Handle messages from content scripts and popup
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'CONTENT_SCRIPT_READY' && sender.tab) {
     console.log(`[Background] Content script ready in tab ${sender.tab.id}`);
     readyTabs.add(sender.tab.id);
@@ -19,9 +31,23 @@ chrome.runtime.onMessage.addListener((message, sender) => {
       messageQueue.delete(sender.tab.id);
       queuedMessages.forEach(msg => sendMessageToTab(sender.tab.id, msg));
     }
+    return false; // No async response needed for this message type
   } else if (message.type === 'LOG') {
     console.log(...[message.data.message, ...(message.data.args || [])]);
+    return false; // No async response needed for this message type
+  } else if (message.action === 'clearCache') {
+    console.log('[Background] Received clear cache request');
+    // Handle cache clearing asynchronously
+    clearAllCache().then(response => {
+      sendResponse(response);
+    }).catch(error => {
+      console.error('[Background] Failed to clear cache:', error);
+      sendResponse({ success: false, error: error.message });
+    });
+    return true; // Indicate that the response will be sent asynchronously
   }
+  // Default case if no message type matches
+  return false;
 });
 
 // Clean up when tabs are closed

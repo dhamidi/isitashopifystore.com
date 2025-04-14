@@ -1,15 +1,10 @@
 {
   "manifest_version": 3,
   "name": "Shopify Store Detector",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Detects if a website is running on Shopify",
-  "permissions": [
-    "tabs",
-    "storage"
-  ],
-  "host_permissions": [
-    "https://isitashopifystore.com/*"
-  ],
+  "permissions": ["tabs", "storage"],
+  "host_permissions": ["https://isitashopifystore.com/*"],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
@@ -42,4 +37,5 @@
     "128": "assets/shopify-icon-128.png",
     "512": "assets/shopify-icon-512.png"
   }
-} 
+}
+
